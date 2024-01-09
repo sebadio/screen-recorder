@@ -1,35 +1,45 @@
 ---
 import ContentTypeCheckbox from "../components/ContentTypeCheckbox.astro";
 import FilenameInput from "../components/FilenameInput.astro";
+import Footer from "../components/Footer.astro";
 import FormatTypeSelect from "../components/FormatTypeSelect.astro";
+import PresetTypeSelect from "../components/PresetTypeSelect.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Screen Recorder">
-  <main class="m-auto max-w-[800px] w-full">
-    <h1 class="text-3xl font-semibold mb-4">Screen Recorder</h1>
+  <main class="m-auto max-w-[800px] w-full flex flex-col gap-4">
+    <h1 class="text-3xl font-semibold text-center mb-0 mt-8">
+      Screen Recorder
+    </h1>
+    <hr
+      class="w-48 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-700"
+    />
 
-    <FilenameInput>Filename</FilenameInput>
+    <PresetTypeSelect>Preset</PresetTypeSelect>
 
-    <ContentTypeCheckbox value="video">Video</ContentTypeCheckbox>
-    <ContentTypeCheckbox value="audio">Audio</ContentTypeCheckbox>
+    <div class="flex gap-1">
+      <FilenameInput clase="w-full">Filename</FilenameInput>
+      <FormatTypeSelect>Format</FormatTypeSelect>
+    </div>
 
-    <FormatTypeSelect>Format</FormatTypeSelect>
+    <div class="flex gap-2">
+      <button
+        data-stop-recording
+        disabled
+        class="p-2 w-full bg-blue-300 hover:bg-blue-600 font-semibold rounded disabled:bg-blue-800 disabled:cursor-not-allowed"
+        >Stop Recording</button
+      >
 
-    <button
-      data-stop-recording
-      disabled
-      class="p-2 bg-blue-300 hover:bg-blue-600 font-semibold rounded disabled:bg-blue-800 disabled:cursor-not-allowed"
-      >Stop Recording</button
-    >
-
-    <button
-      data-start-recording
-      class="p-2 bg-red-400 hover:bg-red-600 font-semibold rounded disabled:bg-red-800 disabled:cursor-not-allowed"
-    >
-      Start Recording</button
-    >
+      <button
+        data-start-recording
+        class="p-2 w-full bg-red-400 hover:bg-red-600 font-semibold rounded disabled:bg-red-800 disabled:cursor-not-allowed"
+      >
+        Start Recording</button
+      >
+    </div>
   </main>
+  <Footer />
 </Layout>
 
 <script>
@@ -53,7 +63,11 @@ import Layout from "../layouts/Layout.astro";
 
     media = await navigator.mediaDevices.getDisplayMedia({
       video: { frameRate: { ideal: 60, max: 60 } },
-      audio: true,
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+      },
     });
 
     const recordingType = document.querySelector(
@@ -87,7 +101,10 @@ import Layout from "../layouts/Layout.astro";
     startRecording.disabled = false;
     stopRecording.disabled = true;
 
-    const [video] = media.getVideoTracks();
-    video.stop();
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+    }
+
+    media.getTracks().forEach((track) => track.stop());
   }
 </script>
