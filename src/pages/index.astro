@@ -2,12 +2,110 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Welcome to Astro.">
-  <main class="m-auto max-w-5xl w-full">
-    <p>Start Recording</p>
-    <button>Start</button>
+<Layout title="Screen Recorder">
+  <main class="m-auto max-w-[800px] w-full">
+    <h1 class="text-3xl font-semibold mb-4">Screen Recorder</h1>
 
-    <p>Stop Recording</p>
-    <button>Stop</button>
+    <label>
+      Filename
+      <input type="text" name="filename" id="filename" />
+    </label>
+    <br />
+
+    <label>
+      Video
+      <input type="checkbox" name="video" id="video" />
+    </label>
+    <label>
+      Audio
+      <input type="checkbox" name="audio" id="audio" />
+    </label>
+
+    <br />
+    <label>
+      Format
+      <select
+        name="videoFormat"
+        id="videoFormat"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      >
+        <optgroup label="Video" data-video-group>
+          <option value="mp4" data-mimeType="video/mp4">.mp4</option>
+          <option value="webm">.webm</option>
+        </optgroup>
+        <optgroup label="Audio" data-audio-group>
+          <option value="mp3" data-mimeType="">.mp3</option>
+          <option value="wav" data-mimeType="">.wav</option>
+        </optgroup>
+      </select>
+    </label>
+
+    <button
+      data-start-recording
+      class="p-2 bg-red-400 hover:bg-red-600 font-semibold rounded disabled:bg-red-800 disabled:cursor-not-allowed"
+    >
+      Start Recording</button
+    >
+
+    <button
+      data-stop-recording
+      disabled
+      class="p-2 bg-blue-300 hover:bg-blue-600 font-semibold rounded disabled:bg-blue-800 disabled:cursor-not-allowed"
+      >Stop Recording</button
+    >
   </main>
 </Layout>
+
+<script>
+  const startRecording = document.querySelector(
+    "[data-start-recording]"
+  ) as HTMLButtonElement;
+  const stopRecording = document.querySelector(
+    "[data-stop-recording]"
+  ) as HTMLButtonElement;
+
+  let mediaRecorder: MediaRecorder;
+  let media: MediaStream;
+
+  startRecording.addEventListener("click", handleStartRecording);
+
+  stopRecording.addEventListener("click", handleStopRecording);
+
+  async function handleStartRecording(e) {
+    console.log("start recording");
+    startRecording.disabled = true;
+    stopRecording.disabled = false;
+
+    media = await navigator.mediaDevices.getDisplayMedia({
+      video: { frameRate: { ideal: 60, max: 60 } },
+      audio: true,
+    });
+
+    mediaRecorder = new MediaRecorder(media, {
+      mimeType: "video/webm;codecs=vp8,opus",
+    });
+
+    mediaRecorder.start();
+
+    mediaRecorder.addEventListener("dataavailable", (e) => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(e.data);
+      link.download = "recording.webm";
+      link.click();
+    });
+
+    const [video] = media.getVideoTracks();
+    video.addEventListener("ended", () => {
+      mediaRecorder.stop();
+    });
+  }
+
+  async function handleStopRecording(e) {
+    console.log("stop recording");
+    startRecording.disabled = false;
+    stopRecording.disabled = true;
+
+    const [video] = media.getVideoTracks();
+    video.stop();
+  }
+</script>
