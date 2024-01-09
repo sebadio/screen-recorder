@@ -1,0 +1,28 @@
+---
+
+---
+
+<div>
+  <label>
+    <slot />
+    <select
+      name="videoFormat"
+      id="videoFormat"
+      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+    >
+      <optgroup label="Video" data-video-group>
+        <option
+          value="mp4"
+          data-mimeType="video/mp4;codecs=avc1.42E01E,mp4a.40.2">.mp4</option
+        >
+        <option value="webm" data-mimeType="video/webm;codecs=vp8,opus"
+          >.webm</option
+        >
+      </optgroup>
+      <optgroup label="Audio" data-audio-group>
+        <option value="mp3" data-mimeType="audio/mpeg">.mp3</option>
+        <option value="wav" data-mimeType="audio/wav">.wav</option>
+      </optgroup>
+    </select>
+  </label>
+</div>

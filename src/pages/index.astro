@@ -1,4 +1,7 @@
 ---
+import ContentTypeCheckbox from "../components/ContentTypeCheckbox.astro";
+import FilenameInput from "../components/FilenameInput.astro";
+import FormatTypeSelect from "../components/FormatTypeSelect.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -6,52 +9,25 @@ import Layout from "../layouts/Layout.astro";
   <main class="m-auto max-w-[800px] w-full">
     <h1 class="text-3xl font-semibold mb-4">Screen Recorder</h1>
 
-    <label>
-      Filename
-      <input type="text" name="filename" id="filename" />
-    </label>
-    <br />
+    <FilenameInput>Filename</FilenameInput>
 
-    <label>
-      Video
-      <input type="checkbox" name="video" id="video" />
-    </label>
-    <label>
-      Audio
-      <input type="checkbox" name="audio" id="audio" />
-    </label>
+    <ContentTypeCheckbox value="video">Video</ContentTypeCheckbox>
+    <ContentTypeCheckbox value="audio">Audio</ContentTypeCheckbox>
 
-    <br />
-    <label>
-      Format
-      <select
-        name="videoFormat"
-        id="videoFormat"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      >
-        <optgroup label="Video" data-video-group>
-          <option value="mp4" data-mimeType="video/mp4">.mp4</option>
-          <option value="webm">.webm</option>
-        </optgroup>
-        <optgroup label="Audio" data-audio-group>
-          <option value="mp3" data-mimeType="">.mp3</option>
-          <option value="wav" data-mimeType="">.wav</option>
-        </optgroup>
-      </select>
-    </label>
-
-    <button
-      data-start-recording
-      class="p-2 bg-red-400 hover:bg-red-600 font-semibold rounded disabled:bg-red-800 disabled:cursor-not-allowed"
-    >
-      Start Recording</button
-    >
+    <FormatTypeSelect>Format</FormatTypeSelect>
 
     <button
       data-stop-recording
       disabled
       class="p-2 bg-blue-300 hover:bg-blue-600 font-semibold rounded disabled:bg-blue-800 disabled:cursor-not-allowed"
       >Stop Recording</button
+    >
+
+    <button
+      data-start-recording
+      class="p-2 bg-red-400 hover:bg-red-600 font-semibold rounded disabled:bg-red-800 disabled:cursor-not-allowed"
+    >
+      Start Recording</button
     >
   </main>
 </Layout>
@@ -68,7 +44,6 @@ import Layout from "../layouts/Layout.astro";
   let media: MediaStream;
 
   startRecording.addEventListener("click", handleStartRecording);
-
   stopRecording.addEventListener("click", handleStopRecording);
 
   async function handleStartRecording(e) {
@@ -81,16 +56,23 @@ import Layout from "../layouts/Layout.astro";
       audio: true,
     });
 
+    const recordingType = document.querySelector(
+      "[data-video-group] option:checked"
+    ) as HTMLOptionElement;
+
     mediaRecorder = new MediaRecorder(media, {
-      mimeType: "video/webm;codecs=vp8,opus",
+      mimeType: recordingType.dataset.mimeType,
     });
 
     mediaRecorder.start();
 
     mediaRecorder.addEventListener("dataavailable", (e) => {
+      const filename = document.querySelector("#filename") as HTMLInputElement;
+      if (!filename.value) filename.value = "recording";
+
       const link = document.createElement("a");
       link.href = URL.createObjectURL(e.data);
-      link.download = "recording.webm";
+      link.download = `${filename.value}.${recordingType.value}`;
       link.click();
     });
 
