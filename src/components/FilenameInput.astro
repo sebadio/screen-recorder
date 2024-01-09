@@ -1,4 +1,12 @@
-<label>
+---
+interface Props {
+  clase?: string;
+}
+
+const { clase } = Astro.props;
+---
+
+<label class={clase}>
   <slot />
   <input
     type="text"

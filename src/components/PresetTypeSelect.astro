@@ -1,0 +1,40 @@
+<label>
+  <slot />
+
+  <select
+    name="preset"
+    id="preset"
+    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+  >
+    <option value="custom">Custom</option>
+    <optgroup label="By quality">
+      <option data-format="webm" value="low">Low</option>
+      <option data-format="mp4" value="medium">Medium</option>
+      <option data-format="mp4" value="high">High</option>
+    </optgroup>
+
+    <optgroup label="For social media sharing">
+      <option data-format="mp4" value="YouTube">YouTube</option>
+      <option data-format="webm" value="Discord">Discord</option>
+      <option data-format="mp4" value="Instagram">Instagram</option>
+      <option data-format="mp4" value="Twitter">Twitter</option>
+      <option data-format="mp4" value="Reddit">Reddit</option>
+    </optgroup>
+  </select>
+</label>
+
+<script>
+  const preset = document.getElementById("preset") as HTMLSelectElement;
+  preset.addEventListener("change", (e) => {
+    const formatSelect = document.querySelector(
+      "#videoFormat"
+    ) as HTMLSelectElement;
+    if (preset.value === "custom") {
+      formatSelect.disabled = false;
+      formatSelect.value = "mp4";
+    } else {
+      formatSelect.value = preset.dataset.format;
+      formatSelect.disabled = true;
+    }
+  });
+</script>
