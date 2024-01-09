@@ -1,9 +1,10 @@
 ---
-import ContentTypeCheckbox from "../components/ContentTypeCheckbox.astro";
 import FilenameInput from "../components/FilenameInput.astro";
 import Footer from "../components/Footer.astro";
 import FormatTypeSelect from "../components/FormatTypeSelect.astro";
 import PresetTypeSelect from "../components/PresetTypeSelect.astro";
+import Toggle from "../components/Toggle.astro";
+import VideoHolder from "../components/VideoHolder.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -23,21 +24,31 @@ import Layout from "../layouts/Layout.astro";
       <FormatTypeSelect>Format</FormatTypeSelect>
     </div>
 
+    <Toggle value="autoDownload">Download after finishing recording</Toggle>
+
     <div class="flex gap-2">
       <button
         data-stop-recording
         disabled
-        class="p-2 w-full bg-blue-300 hover:bg-blue-600 font-semibold rounded disabled:bg-blue-800 disabled:cursor-not-allowed"
+        class="p-2 w-full bg-blue-300 transition-all hover:bg-blue-600 font-semibold rounded disabled:bg-blue-800 disabled:cursor-not-allowed"
         >Stop Recording</button
       >
 
       <button
         data-start-recording
-        class="p-2 w-full bg-red-400 hover:bg-red-600 font-semibold rounded disabled:bg-red-800 disabled:cursor-not-allowed"
+        class="p-2 w-full bg-red-400 transition-all hover:bg-red-600 font-semibold rounded disabled:bg-red-800 disabled:cursor-not-allowed"
       >
         Start Recording</button
       >
     </div>
+
+    <a
+      id="downloadLink"
+      class="bg-emerald-500 transition-all hover:bg-emerald-600 w-full p-2 font-semibold text-center rounded hidden"
+      >Download video</a
+    >
+
+    <VideoHolder />
   </main>
   <Footer />
 </Layout>
@@ -87,7 +98,29 @@ import Layout from "../layouts/Layout.astro";
       const link = document.createElement("a");
       link.href = URL.createObjectURL(e.data);
       link.download = `${filename.value}.${recordingType.value}`;
-      link.click();
+
+      const autoDownload = document.querySelector(
+        "#autoDownload"
+      ) as HTMLInputElement;
+      if (autoDownload.checked) {
+        link.click();
+      }
+
+      const downloadLink = document.querySelector(
+        "#downloadLink"
+      ) as HTMLAnchorElement;
+      downloadLink.classList.remove("hidden");
+      downloadLink.href = link.href;
+      downloadLink.download = link.download;
+
+      if (recordingType.value == "webm" || recordingType.value == "mp4") {
+        const videoHolder = document.querySelector(
+          "#videoHolder"
+        ) as HTMLVideoElement;
+        videoHolder.src = link.href;
+        videoHolder.controls = true;
+        videoHolder.classList.remove("hidden");
+      }
     });
 
     const [video] = media.getVideoTracks();
