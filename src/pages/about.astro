@@ -1,0 +1,56 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="About">
+  <main class="m-auto max-w-[80vw] lg:max-w-[800px]">
+    <h1 class="text-center mt-8 font-semibold text-3xl">About this proyect</h1>
+
+    <hr
+      class="w-48 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-700"
+    />
+
+    <p class="text-pretty max-w-[80ch] m-auto">
+      This is a simple proyect to test the Web API of
+      <a
+        class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+        href="https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder"
+        target="_blank"
+        rel="noopener noreferrer">MediaRecorder</a
+      >.
+      <br />
+      This is not a replacement for a professional recording software, nor it tries
+      to be, it is made to record simple things in your monitor. If you do need a
+      more robust recording application, I recommend you to use <a
+        class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+        href="https://obsproject.com/"
+        target="_blank"
+        rel="noopener noreferrer">OBS Studio</a
+      >. It's a open source recording and streaming application, and it's
+      completely free to use.
+    </p>
+
+    <hr
+      class="w-48 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-700"
+    />
+
+    <h2 class="my-8 text-center font-semibold text-2xl">How does this work?</h2>
+    <p class="max-w-[80ch] m-auto text-pretty">
+      This application uses the <a
+        class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+        href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia"
+        target="_blank"
+        rel="noopener noreferrer">getDisplayMedia</a
+      > API to get the stream of your screen, and then uses the <a
+        class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+        href="https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder"
+        target="_blank"
+        rel="noopener noreferrer">MediaRecorder</a
+      > API to record the stream. The recording is done in your browser, so no information
+      is sent to any server. If you're wondering, yes, <span
+        class="italic underline underline-offset-2"
+        >this uses your pc resources to do the recording</span
+      >.
+    </p>
+  </main>
+</Layout>

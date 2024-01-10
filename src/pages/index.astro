@@ -9,7 +9,7 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Screen Recorder">
-  <main class="m-auto max-w-[800px] w-full flex flex-col gap-4">
+  <main class="m-auto max-w-[80vw] lg:max-w-[800px] w-full flex flex-col gap-4">
     <h1 class="text-3xl font-semibold text-center mb-0 mt-8">
       Screen Recorder
     </h1>
@@ -24,9 +24,10 @@ import Layout from "../layouts/Layout.astro";
       <FormatTypeSelect>Format</FormatTypeSelect>
     </div>
 
-    <Toggle value="autoDownload">Download after finishing recording</Toggle>
+    <Toggle value="autoDownload">Download after recording finishes</Toggle>
 
-    <div class="flex gap-2">
+    <!-- Start and stop video -->
+    <div class="flex gap-2 text-white">
       <button
         data-stop-recording
         disabled
@@ -67,11 +68,16 @@ import Layout from "../layouts/Layout.astro";
   startRecording.addEventListener("click", handleStartRecording);
   stopRecording.addEventListener("click", handleStopRecording);
 
+  function changeButtonState() {
+    startRecording.disabled = !startRecording.disabled;
+    stopRecording.disabled = !stopRecording.disabled;
+  }
+
   async function handleStartRecording(e) {
     console.log("start recording");
-    startRecording.disabled = true;
-    stopRecording.disabled = false;
+    changeButtonState();
 
+    //TODO - add audio recording properly
     media = await navigator.mediaDevices.getDisplayMedia({
       video: { frameRate: { ideal: 60, max: 60 } },
       audio: {
@@ -91,48 +97,49 @@ import Layout from "../layouts/Layout.astro";
 
     mediaRecorder.start();
 
-    mediaRecorder.addEventListener("dataavailable", (e) => {
-      const filename = document.querySelector("#filename") as HTMLInputElement;
-      if (!filename.value) filename.value = "recording";
+    mediaRecorder.addEventListener("dataavailable", handleGenerateBlob);
 
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(e.data);
-      link.download = `${filename.value}.${recordingType.value}`;
+    // //FIXME - is this necesary? see handleStopRecording
+    // const [video] = media.getVideoTracks();
+    // video.addEventListener("ended", () => {
+    //   mediaRecorder.stop();
+    // });
+  }
 
-      const autoDownload = document.querySelector(
-        "#autoDownload"
-      ) as HTMLInputElement;
-      if (autoDownload.checked) {
-        link.click();
-      }
+  async function handleGenerateBlob(e) {
+    const recordingType = document.querySelector(
+      "[data-video-group] option:checked"
+    ) as HTMLOptionElement;
 
-      const downloadLink = document.querySelector(
-        "#downloadLink"
-      ) as HTMLAnchorElement;
-      downloadLink.classList.remove("hidden");
-      downloadLink.href = link.href;
-      downloadLink.download = link.download;
+    const filename = document.querySelector("#filename") as HTMLInputElement;
+    if (!filename.value) filename.value = "recording";
 
-      if (recordingType.value == "webm" || recordingType.value == "mp4") {
-        const videoHolder = document.querySelector(
-          "#videoHolder"
-        ) as HTMLVideoElement;
-        videoHolder.src = link.href;
-        videoHolder.controls = true;
-        videoHolder.classList.remove("hidden");
-      }
-    });
+    const autoDownload = document.querySelector(
+      "#autoDownload"
+    ) as HTMLInputElement;
 
-    const [video] = media.getVideoTracks();
-    video.addEventListener("ended", () => {
-      mediaRecorder.stop();
-    });
+    const downloadLink = document.querySelector(
+      "#downloadLink"
+    ) as HTMLAnchorElement;
+    downloadLink.classList.remove("hidden");
+    downloadLink.href = URL.createObjectURL(e.data);
+    downloadLink.download = `${filename.value}.${recordingType.value}`;
+    if (recordingType.value == "webm" || recordingType.value == "mp4") {
+      const videoHolder = document.querySelector(
+        "#videoHolder"
+      ) as HTMLVideoElement;
+      videoHolder.src = downloadLink.href;
+      videoHolder.controls = true;
+      videoHolder.classList.remove("hidden");
+    }
+    if (autoDownload.checked) {
+      downloadLink.click();
+    }
   }
 
   async function handleStopRecording(e) {
     console.log("stop recording");
-    startRecording.disabled = false;
-    stopRecording.disabled = true;
+    changeButtonState();
 
     if (mediaRecorder && mediaRecorder.state === "recording") {
       mediaRecorder.stop();
