@@ -24,7 +24,14 @@ import Layout from "../layouts/Layout.astro";
       <FormatTypeSelect>Format</FormatTypeSelect>
     </div>
 
-    <Toggle value="autoDownload">Download after recording finishes</Toggle>
+    <div class="flex gap-4">
+      <Toggle value="autoDownload">Download after recording finishes</Toggle>
+      <Toggle value="advanced">Advanced options</Toggle>
+    </div>
+
+    <div class="hidden transition-all" id="advancedOptions">
+      <Toggle value="audio">Record audio</Toggle>
+    </div>
 
     <!-- Start and stop video -->
     <div class="flex gap-2 text-white">
@@ -55,6 +62,9 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <script>
+  import { handleGenerateBlob } from "../functions/handleGenerateBlob.ts";
+  import { toggleAdvancedOptions } from "../functions/toggleAdvancedOptions.ts";
+
   const startRecording = document.querySelector(
     "[data-start-recording]"
   ) as HTMLButtonElement;
@@ -67,6 +77,9 @@ import Layout from "../layouts/Layout.astro";
 
   startRecording.addEventListener("click", handleStartRecording);
   stopRecording.addEventListener("click", handleStopRecording);
+  document
+    .querySelector("#advanced")
+    .addEventListener("change", toggleAdvancedOptions);
 
   function changeButtonState() {
     startRecording.disabled = !startRecording.disabled;
@@ -75,7 +88,6 @@ import Layout from "../layouts/Layout.astro";
 
   async function handleStartRecording(e) {
     console.log("start recording");
-    changeButtonState();
 
     //TODO - add audio recording properly
     media = await navigator.mediaDevices.getDisplayMedia({
@@ -86,6 +98,8 @@ import Layout from "../layouts/Layout.astro";
         autoGainControl: false,
       },
     });
+
+    changeButtonState();
 
     const recordingType = document.querySelector(
       "[data-video-group] option:checked"
@@ -98,6 +112,7 @@ import Layout from "../layouts/Layout.astro";
     mediaRecorder.start();
 
     mediaRecorder.addEventListener("dataavailable", handleGenerateBlob);
+    mediaRecorder.addEventListener("stop", changeButtonState);
 
     // //FIXME - is this necesary? see handleStopRecording
     // const [video] = media.getVideoTracks();
@@ -106,40 +121,8 @@ import Layout from "../layouts/Layout.astro";
     // });
   }
 
-  async function handleGenerateBlob(e) {
-    const recordingType = document.querySelector(
-      "[data-video-group] option:checked"
-    ) as HTMLOptionElement;
-
-    const filename = document.querySelector("#filename") as HTMLInputElement;
-    if (!filename.value) filename.value = "recording";
-
-    const autoDownload = document.querySelector(
-      "#autoDownload"
-    ) as HTMLInputElement;
-
-    const downloadLink = document.querySelector(
-      "#downloadLink"
-    ) as HTMLAnchorElement;
-    downloadLink.classList.remove("hidden");
-    downloadLink.href = URL.createObjectURL(e.data);
-    downloadLink.download = `${filename.value}.${recordingType.value}`;
-    if (recordingType.value == "webm" || recordingType.value == "mp4") {
-      const videoHolder = document.querySelector(
-        "#videoHolder"
-      ) as HTMLVideoElement;
-      videoHolder.src = downloadLink.href;
-      videoHolder.controls = true;
-      videoHolder.classList.remove("hidden");
-    }
-    if (autoDownload.checked) {
-      downloadLink.click();
-    }
-  }
-
-  async function handleStopRecording(e) {
+  async function handleStopRecording() {
     console.log("stop recording");
-    changeButtonState();
 
     if (mediaRecorder && mediaRecorder.state === "recording") {
       mediaRecorder.stop();
